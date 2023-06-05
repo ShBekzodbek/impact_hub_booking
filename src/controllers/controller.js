@@ -38,29 +38,16 @@ const BookingController = {
         async (req, res, next) => {
             try {
                 const { id } = req.params;
-                let data = {};
                 let room = await db.room.findOne({
                     where: {
                         id
                     },
                     attributes: ['name', 'type', 'capacity'],
-                    include: db.book
                 });
                 if (!room) {
                     return res.status(404).send({ message: 'Room not found' });
                 }
-                let books = room.books.map(e => {
-                    let newE = {};
-                    newE.id = e.id;
-                    newE.start = moment(e.start).format("LLL");
-                    newE.end = moment(e.end).format("LLL");
-                    return newE;
-                });
-                data.name = room.name;
-                data.type = room.type;
-                data.capacity = room.capacity;
-                data.books = books;
-                return res.status(200).send({ data });
+                return res.status(200).send({ room });
             } catch (err) {
                 next(err);
             }
