@@ -1,5 +1,6 @@
 const db = require('../models/index');
 
+const moment = require('moment');
 
 const BookingController = {
     search:
@@ -37,15 +38,29 @@ const BookingController = {
         async (req, res, next) => {
             try {
                 const { id } = req.params;
-                const room = await db.room.findOne({
+                let data = {};
+                let room = await db.room.findOne({
                     where: {
                         id
-                    }
+                    },
+                    attributes: ['name', 'type', 'capacity'],
+                    include: db.book
                 });
                 if (!room) {
                     return res.status(404).send({ message: 'Room not found' });
                 }
-                return res.status(200).send(room);
+                let books = room.books.map(e => {
+                    let newE = {};
+                    newE.id = e.id;
+                    newE.start = moment(e.start).format("LLL");
+                    newE.end = moment(e.end).format("LLL");
+                    return newE;
+                });
+                data.name = room.name;
+                data.type = room.type;
+                data.capacity = room.capacity;
+                data.books = books;
+                return res.status(200).send({ data });
             } catch (err) {
                 next(err);
             }
@@ -54,20 +69,50 @@ const BookingController = {
         async (req, res, next) => {
             try {
                 const { id } = req.params;
-                const room = await db.room.findOne({
+                let now = new Date();
+                now.setHours(24);
+                const start_date = req.body.start_date ? new Date(req.body.start_date) : Date.now();
+                const end_date = req.body.end_date ? new Date(req.body.end_date) : now;
+                if (!id || typeof id == "undefined") {
+                    return res.status(400).send('Invalid dates');
+                }
+                const validRoomId = await db.room.findOne({
                     where: {
                         id
-                    },
-                    include: db.book
+                    }
                 });
-                if (!room) {
+                if (!validRoomId) {
                     return res.status(404).send({ message: 'Room not found' });
                 }
-                return res.status(200).send(room);
+                if (isNaN(start_date) || isNaN(end_date) || start_date >= end_date) {
+                    return res.status(400).send('Invalid dates');
+                }
+                const isFree = await db.book.findOne({
+                    where: {
+                        roomId: id,
+                        [db.Sequelize.Op.and]: {
+                            start: {
+                                [db.Sequelize.Op.lt]: end_date
+                            },
+                            end: {
+                                [db.Sequelize.Op.gt]: start_date
+                            }
+                        }
+                    }
+                });
+                if (isFree) {
+                    return res.status(400).send({
+                        message: 'Room is already booked'
+                    });
+                }
+                return res.status(200).send({
+                    message: 'Room is available'
+                })
             } catch (err) {
                 next(err);
             }
         },
+
     bookARoom:
         async (req, res, next) => {
             try {
@@ -89,7 +134,6 @@ const BookingController = {
                     return res.status(400).send('Invalid dates');
                 }
                 const isFree = await db.book.findOne({
-
                     where: {
                         roomId: id,
                         [db.Sequelize.Op.and]: {
@@ -107,7 +151,6 @@ const BookingController = {
                         message: 'Room is already booked'
                     });
                 }
-
                 let resident;
                 const isOldresident = await db.resident.findOne({
                     where: {
