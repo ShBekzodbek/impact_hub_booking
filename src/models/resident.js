@@ -1,8 +1,8 @@
 module.exports = (sequelize, DataTypes) => {
     const Resident = sequelize.define('resident', {
         id: {
-            type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4,
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
             primaryKey: true,
         },
         name: {
@@ -18,6 +18,8 @@ module.exports = (sequelize, DataTypes) => {
         phone: {
             type: DataTypes.STRING,
         }
+    }, {
+        timestamps: false
     });
     return Resident;
 }

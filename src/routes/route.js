@@ -5,7 +5,7 @@ const router = require('express').Router();
 
 // By the name of room and sort by the type 
 // page number and page_size
-router.get('/search', BookingController.search);
+router.get('/', BookingController.search);
 
 // id will be given by params
 router.get("/:id", BookingController.getARoom);

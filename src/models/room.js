@@ -1,8 +1,8 @@
 module.exports = (sequelize, DataTypes) => {
     const Room = sequelize.define('room', {
         id: {
-            type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4,
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
             primaryKey: true,
         },
         name: {
@@ -17,6 +17,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false
         }
+    }, {
+        timestamps: false
     });
     return Room;
 }

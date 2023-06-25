@@ -34,13 +34,14 @@ app.use("*", (req, res, next) => {
 })
 
 
-
 app.use(ErrorHandler);
 
 process.on("unhandledRejection", () => {
     console.log("unhandledRejection");
     process.exit(1);
 });
+
+
 
 app.listen(process.env.port, () => {
     // db.syncDB();

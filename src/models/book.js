@@ -1,8 +1,8 @@
 module.exports = (sequelize, DataTypes) => {
     const Book = sequelize.define('book', {
         id: {
-            type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4,
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
             primaryKey: true,
         },
         start: {
@@ -13,6 +13,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.DATE,
             allowNull: false
         }
+    },{
+        timestamps: false
     });
     return Book;
 }
